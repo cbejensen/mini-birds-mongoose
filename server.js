@@ -82,10 +82,3 @@ var port = 8000;
 app.listen(port, function() {
   console.log('Listening on ' + port)
 })
-
-
-var obj = {
-  "title": "Spaghetti: Forced to Eat It",
-  "author": "Garfield",
-  "year": 190
-}
