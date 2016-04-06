@@ -1,83 +1,30 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var mongojs = require('mongojs');
+var mongoose = require('mongoose');
 
-// mongo
-var db = mongojs('mini-birds');
-var Sighting = db.collection('sightings');
-
-// express
 var app = express();
 
-// middleware
 app.use(bodyParser());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 
-// ENDPOINTS - CRUD
-// create
-app.post('/api/sighting', function(req, res, next) {
-  console.log(req.body);
-  Sighting.insert(req.body, function(err, result) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.send(result);
-    }
-  })
-})
+var sightingCtrl = require('./sightingCtrl.js');
 
-// read
-app.get('/api/sighting', function(req, res, next) {
-  if (req.query.real) { //change from string to boolean
-    if (req.query.real === 'true') {
-      req.query.real = true;
-    } else {
-      req.query.real = false;
-    }
-  }
-  console.log(req.query);
-  Sighting.find(req.query, function(err, result) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.send(result);
-    }
-  })
-})
-
-// update
-app.put('/api/sighting/:id', function(req, res, next) {
-  console.log(req.body);
-  Sighting.findAndModify({ //modifies only one doc
-    query: {_id: mongojs.ObjectId(req.params.id)}, // which doc to update
-    update: { $set: req.body }, // what we want to update
-    new: true //returns modified document instead of original
-  }, function(err, result) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.send(result);
-    }
-  })
-})
-
-// delete
-app.delete('/api/sighting/:id', function(req, res, next) {
-  console.log(req.query);
-  Sighting.remove({_id: mongojs.ObjectId(req.params.id)},
-                  true, // delete only one document
-                  function(err, result) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.send(result);
-    }
-  })
-})
-
+app.post('/sightings', sightingCtrl.create)
+app.get('/sightings', sightingCtrl.read)
+app.put('/sightings/:id', sightingCtrl.update)
+app.delete('/sightings/:id', sightingCtrl.delete)
 
 // connection
+var uri = 'mongodb://localhost/test';
+mongoose.connect(uri);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log('We are connected to Mongoose!');
+})
+
 var port = 8000;
 app.listen(port, function() {
   console.log('Listening on ' + port)
