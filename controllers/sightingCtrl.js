@@ -1,10 +1,10 @@
-var Sighting = require('./models/sighting');
+var Sighting = require('../models/sighting');
 
 module.exports = {
   
   create: function(req, res) {
     var newSighting = new Sighting(req.body);
-    //alt method to skip above line and replace below line:
+    // alt method to replace lines above and below
     // Sighting.create(req.body, function(err, result) {
     newSighting.save(function(err, result) {
       if (err) {
@@ -17,7 +17,10 @@ module.exports = {
 
   read: function(req, res) {
     console.log(req.query);
-    Sighting.find(req.query).exec(function(err, result) {
+    Sighting
+    .find(req.query)
+    .populate('user', 'username')
+    .exec(function(err, result) {
       if (err) {
         res.status(500).send(err);
       } else {
